@@ -1,16 +1,87 @@
 import { Dispatch, useEffect, useState } from 'react';
-import {View, Text, StyleSheet} from "react-native"
+import {View, Text, StyleSheet, RefreshControl, FlatList, ScrollView} from "react-native"
 import { useNavigation, useRouter, useLocalSearchParams } from 'expo-router'
 import { Button, Card, Chip, IconButton, Title, TextInput} from 'react-native-paper'
 import { ChapterAssuntoComentario } from '../../src/model/ChapterAssuntoComentario';
 import { obterChaptersAssuntoComentario } from '../../src/service/ChapterAssuntoComentarioService';
-import { NativeBaseProvider, ScrollView, VStack } from 'native-base';
 import { faker } from '@faker-js/faker';
 
-function listarChaptersAssuntoComentario(list : ChapterAssuntoComentario[]) {
+function Comentario(comentario: ChapterAssuntoComentario) {
     return(
-        (list.map(assunto => (
-            <Card style={styles.card} key={assunto.key} >
+        <Card style={styles.card}>
+            <View style={styles.cardTopSideComentario}>
+                <View style={{flexDirection: 'row', alignItems: "center", flexGrow: 0}}>
+                    <Chip mode="outlined" style={{flexGrow: 0}} textStyle={{marginVertical: 4, color: 'blue'}}>{comentario.author}</Chip>
+                    <Text style={{color: 'grey', fontSize: 12, marginLeft: 8}}>{comentario.time.toString()}</Text>
+                </View>
+                {(comentario.respondida)?<IconButton icon="check-circle"  iconColor='blue' size={15} onPress={() => (console.log('check'))}/>:<></>}
+            </View>
+            <Card.Content style={styles.cardConteudo}>
+                <View style={styles.cardTopSide}>
+                <Text style={{fontSize: 16, width: '85%'}}>{comentario.description}</Text>
+                </View>
+                <View style={styles.cardBotSide}>
+                <Button icon='thumb-up' style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{comentario.like}</Button>
+                <Button icon='thumb-down' style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{comentario.unlike}</Button>
+                </View>
+            </Card.Content>
+        </Card>
+    )
+}
+
+
+// function listarChaptersAssuntoComentario(list : ChapterAssuntoComentario[]) {
+    //     return(
+        // (list.map(assunto => (
+        //     <Card style={styles.card} key={assunto.key} >
+        //         <View style={styles.cardTopSideComentario}>
+        //             <View style={{flexDirection: 'row', alignItems: "center", flexGrow: 0}}>
+        //                 <Chip mode="outlined" style={{flexGrow: 0}} textStyle={{marginVertical: 4, color: 'blue'}}>{assunto.author}</Chip>
+        //                 <Text style={{color: 'grey', fontSize: 12, marginLeft: 8}}>{assunto.time.toString()}</Text>
+        //             </View>
+        //             {(assunto.respondida)?<IconButton icon="check-circle"  iconColor='blue' size={15} onPress={() => (console.log('check'))}/>:<></>}
+        //         </View>
+        //        <Card.Content style={styles.cardConteudo}>
+        //          <View style={styles.cardTopSide}>
+        //            <Text style={{fontSize: 16, width: '85%'}}>{assunto.description}</Text>
+        //          </View>
+        //          <View style={styles.cardBotSide}>
+        //            <Button icon='thumb-up' style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{assunto.like}</Button>
+        //            <Button icon='thumb-down' style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{assunto.unlike}</Button>
+        //          </View>
+        //        </Card.Content>
+        //      </Card>
+//         )))
+//     )
+// };
+
+const renderItem = ({comentario}: {comentario: ChapterAssuntoComentario}) => {
+    return (
+        <Card style={styles.card} key={comentario.key} >
+        <View style={styles.cardTopSideComentario}>
+            <View style={{flexDirection: 'row', alignItems: "center", flexGrow: 0}}>
+                <Chip mode="outlined" style={{flexGrow: 0}} textStyle={{marginVertical: 4, color: 'blue'}}>{comentario.author}</Chip>
+                <Text style={{color: 'grey', fontSize: 12, marginLeft: 8}}>{comentario.time.toString()}</Text>
+            </View>
+            {(comentario.respondida)?<IconButton icon="check-circle"  iconColor='blue' size={15} onPress={() => (console.log('check'))}/>:<></>}
+        </View>
+        <Card.Content style={styles.cardConteudo}>
+            <View style={styles.cardTopSide}>
+            <Text style={{fontSize: 16, width: '85%'}}>{comentario.description}</Text>
+            </View>
+            <View style={styles.cardBotSide}>
+            <Button icon='thumb-up' style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{comentario.like}</Button>
+            <Button icon='thumb-down' style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{comentario.unlike}</Button>
+            </View>
+        </Card.Content>
+    </Card>
+    );
+  };
+
+function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario[]) {
+    return(
+        (chaptersAssunto.map((assunto, index) => (
+            <Card style={styles.card} key={index} >
                 <View style={styles.cardTopSideComentario}>
                     <View style={{flexDirection: 'row', alignItems: "center", flexGrow: 0}}>
                         <Chip mode="outlined" style={{flexGrow: 0}} textStyle={{marginVertical: 4, color: 'blue'}}>{assunto.author}</Chip>
@@ -28,29 +99,20 @@ function listarChaptersAssuntoComentario(list : ChapterAssuntoComentario[]) {
                  </View>
                </Card.Content>
              </Card>
-        )))
-    )
-};
-
-
-function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario[]) {
-    return(
-        <VStack style={{paddingBottom: 8}}>
-            {listarChaptersAssuntoComentario(chaptersAssunto)}
-        </VStack>
-    )
+        // <FlatList /*refreshing={} onRefresh={}*/ data={chaptersAssunto} renderItem={({item}) => <Comentario {...item}/>} style={{paddingBottom: 8}} />
+    ))))
 }
 
-const Perguntar = (chaptersAssuntoComentario: ChapterAssuntoComentario[] ,setChaptersAssuntoComentario: Dispatch<ChapterAssuntoComentario[]>) => {
+const Perguntar = (adicionarComentario: Function, chaptersAssuntoComentario: ChapterAssuntoComentario[]) => {
     const [descricaoResposta, setDescricaoResposta] = useState('');
-    
     const setResposta = (text: string) => {
         setDescricaoResposta(text);
     }
-
+    
     const criarResposta = () => {
-        const novaPergunta: ChapterAssuntoComentario = {id: 1,
-            key: 1,
+        const novaPergunta: ChapterAssuntoComentario = {
+            id: 1,
+            key: (chaptersAssuntoComentario.length+1),
             title: null,
             description: descricaoResposta,
             author: faker.name.firstName(),
@@ -59,17 +121,15 @@ const Perguntar = (chaptersAssuntoComentario: ChapterAssuntoComentario[] ,setCha
             comments: 0,
             like: 0,
             unlike: 0,
-            respondida: false}
-        chaptersAssuntoComentario.push(novaPergunta)
-        const novaListaComentario = chaptersAssuntoComentario
-        setChaptersAssuntoComentario(novaListaComentario)
-        console.log(novaListaComentario.length)
+            respondida: false
+        }
+        adicionarComentario(novaPergunta);
     }
     return(
         <Card style={{marginLeft: '3%', marginRight: '3%', marginTop: 8, padding: 8}}>
             <Text style={{color: 'grey', fontSize: 12, marginLeft: 8}}>Responder como user</Text>
             <TextInput style={{backgroundColor: 'white'}} outlineColor='blue' onChangeText={text => setResposta(text)} multiline={true} mode='outlined' placeholder='Resposta'/>
-            <Button onPress={() => (criarResposta(), console.log('teste'))}>Perguntar</Button>
+            <Button onPress={() => (criarResposta())}>Perguntar</Button>
         </Card>
     )
 }
@@ -80,17 +140,22 @@ export default function Topico(){
     const {title, descricao, autor, time} = useLocalSearchParams();
     
     const [chaptersAssunto, setChaptersAssunto] = useState<ChapterAssuntoComentario[]>([]);
+
     useEffect(() => {setChaptersAssunto(obterChaptersAssuntoComentario())}, [])
 
+    function adicionarComentário(comentario: ChapterAssuntoComentario){
+        // setChaptersAssunto(comentario)
+        setChaptersAssunto([...chaptersAssunto, comentario]);
+    }
+
     return(
-        <NativeBaseProvider>
-            <ScrollView >
-                <View style={{justifyContent: 'flex-start', alignItems: 'center', flex: 1}}>
-                    <View style={styles.navBar}>
-                        <Text style={styles.navItem}>Home</Text>
-                        <Text style={styles.navItem}>Sobre</Text>
-                        <Text style={styles.navItem}>Contato</Text>
-                    </View>
+        <View style={{justifyContent: 'flex-start', alignItems: 'center', flex: 1}}>
+                <View style={styles.navBar}>
+                    <Text style={styles.navItem}>Home</Text>
+                    <Text style={styles.navItem}>Sobre</Text>
+                    <Text style={styles.navItem}>Contato</Text>
+                </View>
+                <ScrollView>
                     <View style={{width:'100%'}}>
                         <Card style={{marginLeft: '3%', marginRight: '3%', marginTop: '5%'}}>
                             <View style={styles.cardTopSide}>
@@ -106,16 +171,12 @@ export default function Topico(){
                             </View>
                         </Card>
                     </View>
-                    <View style={{width:'100%'}}>
+                    <View style={{width:'100%', flex:1}}>
                         {ListChaptersAssuntoComentario(chaptersAssunto)}
+                        {Perguntar(adicionarComentário, chaptersAssunto)}
                     </View>
-                    <View style={{width: '100%'}}>
-                        {Perguntar(chaptersAssunto, setChaptersAssunto)}
-                    </View>
-                    <Button onPress={() => navigation.goBack()}>Voltar</Button>
-                </View>
-            </ScrollView>
-        </NativeBaseProvider>
+                </ScrollView>
+            </View>
     )
 }
 

@@ -7,7 +7,7 @@ const endpoint = `${URL}/chapter/`;
 function obterChaptersAssuntoComentario() {
     var lista = [];
 
-    for (let index = 0; index < faker.datatype.number({min:0, max:8}); index++) {
+    for (let index = 0; index < faker.datatype.number({min:3, max:8}); index++) {
 
         var item: ChapterAssuntoComentario = {
             id: faker.datatype.number(100000),
