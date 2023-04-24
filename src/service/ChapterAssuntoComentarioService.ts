@@ -10,7 +10,7 @@ function obterChaptersAssuntoComentario() {
     for (let index = 0; index < faker.datatype.number({min:0, max:8}); index++) {
 
         var item: ChapterAssuntoComentario = {
-            id: faker.datatype.uuid(),
+            id: faker.datatype.number(100000),
             key: index,
             title: faker.lorem.sentence(),
             description: faker.lorem.paragraph(),

@@ -1,7 +1,7 @@
 export interface ChapterAssuntoComentario{
-    id: string;
+    id: number;
     key: number,
-    title: string,
+    title: string | undefined | null,
     description: string,
     author: string,
     time: Date,

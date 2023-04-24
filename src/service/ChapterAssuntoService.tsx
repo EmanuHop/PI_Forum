@@ -36,7 +36,7 @@ function obterChaptersAssunto() {
         }
 
         var item: ChapterAssunto = {
-            id: faker.datatype.uuid(),
+            id: faker.datatype.number(100000),
             key: index,
             title: faker.lorem.sentence(),
             description: faker.lorem.paragraph(),

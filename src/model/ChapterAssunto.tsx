@@ -2,7 +2,7 @@ import { Tag } from "./Tag";
 
 
 export interface ChapterAssunto{
-    id: string;
+    id: number;
     key: number,
     title: string,
     description: string,

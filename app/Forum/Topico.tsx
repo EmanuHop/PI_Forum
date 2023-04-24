@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 import {View, Text, StyleSheet} from "react-native"
 import { useNavigation, useRouter, useLocalSearchParams } from 'expo-router'
 import { Button, Card, Chip, IconButton, Title, TextInput} from 'react-native-paper'
 import { ChapterAssuntoComentario } from '../../src/model/ChapterAssuntoComentario';
 import { obterChaptersAssuntoComentario } from '../../src/service/ChapterAssuntoComentarioService';
 import { NativeBaseProvider, ScrollView, VStack } from 'native-base';
+import { faker } from '@faker-js/faker';
 
 function listarChaptersAssuntoComentario(list : ChapterAssuntoComentario[]) {
     return(
@@ -32,9 +33,7 @@ function listarChaptersAssuntoComentario(list : ChapterAssuntoComentario[]) {
 };
 
 
-function ListChaptersAssuntoComentario() {
-    const [chaptersAssunto, setChaptersAssunto] = useState<ChapterAssuntoComentario[]>([]);
-    useEffect(() => {setChaptersAssunto(obterChaptersAssuntoComentario())}, [])
+function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario[]) {
     return(
         <VStack style={{paddingBottom: 8}}>
             {listarChaptersAssuntoComentario(chaptersAssunto)}
@@ -42,10 +41,46 @@ function ListChaptersAssuntoComentario() {
     )
 }
 
+const Perguntar = (chaptersAssuntoComentario: ChapterAssuntoComentario[] ,setChaptersAssuntoComentario: Dispatch<ChapterAssuntoComentario[]>) => {
+    const [descricaoResposta, setDescricaoResposta] = useState('');
+    
+    const setResposta = (text: string) => {
+        setDescricaoResposta(text);
+    }
+
+    const criarResposta = () => {
+        const novaPergunta: ChapterAssuntoComentario = {id: 1,
+            key: 1,
+            title: null,
+            description: descricaoResposta,
+            author: faker.name.firstName(),
+            time: faker.date.birthdate({min:0, max: 2, mode: 'age'}),
+            views: 0,
+            comments: 0,
+            like: 0,
+            unlike: 0,
+            respondida: false}
+        chaptersAssuntoComentario.push(novaPergunta)
+        const novaListaComentario = chaptersAssuntoComentario
+        setChaptersAssuntoComentario(novaListaComentario)
+        console.log(novaListaComentario.length)
+    }
+    return(
+        <Card style={{marginLeft: '3%', marginRight: '3%', marginTop: 8, padding: 8}}>
+            <Text style={{color: 'grey', fontSize: 12, marginLeft: 8}}>Responder como user</Text>
+            <TextInput style={{backgroundColor: 'white'}} outlineColor='blue' onChangeText={text => setResposta(text)} multiline={true} mode='outlined' placeholder='Resposta'/>
+            <Button onPress={() => (criarResposta(), console.log('teste'))}>Perguntar</Button>
+        </Card>
+    )
+}
+
 export default function Topico(){
     const navigation = useNavigation();
     const router = useRouter();
     const {title, descricao, autor, time} = useLocalSearchParams();
+    
+    const [chaptersAssunto, setChaptersAssunto] = useState<ChapterAssuntoComentario[]>([]);
+    useEffect(() => {setChaptersAssunto(obterChaptersAssuntoComentario())}, [])
 
     return(
         <NativeBaseProvider>
@@ -72,13 +107,10 @@ export default function Topico(){
                         </Card>
                     </View>
                     <View style={{width:'100%'}}>
-                        {ListChaptersAssuntoComentario()}
+                        {ListChaptersAssuntoComentario(chaptersAssunto)}
                     </View>
                     <View style={{width: '100%'}}>
-                        <Card style={{marginLeft: '3%', marginRight: '3%', marginTop: 8, padding: 8}}>
-                            <Text style={{color: 'grey', fontSize: 12, marginLeft: 8}}>Responder como user</Text>
-                            <TextInput style={{backgroundColor: 'white'}} outlineColor='blue' multiline={true} mode='outlined' placeholder='Resposta'/>
-                        </Card>
+                        {Perguntar(chaptersAssunto, setChaptersAssunto)}
                     </View>
                     <Button onPress={() => navigation.goBack()}>Voltar</Button>
                 </View>
