@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useRouter, useNavigation, useSearchParams } from "expo-router";
 import { ScrollView, HStack, VStack, List, NativeBaseProvider } from 'native-base';
@@ -8,40 +8,69 @@ import { obterChaptersAssunto } from '../../src/service/ChapterAssuntoService';
 import { Tag } from '../../src/model/Tag';
 import { obterTags } from '../../src/service/tagService';
 
-
-
-const listarTags = (tags: Tag[]) => tags.map(tag => (
-  <List style={{borderWidth: 0, paddingTop: 7, paddingBottom: 7, paddingLeft: 3, paddingRight: 3}} key={tag.id}>{TagUc(tag.nome)}</List>
-))
-
-const ListTags = () => {
-    const [tags, setTags] = useState<Tag[]>([]);
-
+function ListTags(chaptersAssunto: ChapterAssunto[], setChaptersAssunto: Dispatch<ChapterAssunto[]>) {
+  const [tags, setTags] = useState<Tag[]>([]);
   useEffect(() => {
     setTags(obterTags());
   }, [])
-
+  
   return (
       <ScrollView horizontal showsHorizontalScrollIndicator={false} flexGrow={0} style={{borderBottomWidth: 1, borderTopWidth: 1, borderColor: 'gray'}}>
         <HStack space={1}>
-          {listarTags(tags)}
+          {listarTags(chaptersAssunto, setChaptersAssunto,tags)}
         </HStack>
       </ScrollView>
   )
 };
 
-function listarChaptersAssunto(list : ChapterAssunto[]) {
+const listarTags = (chaptersAssunto: ChapterAssunto[], setChaptersAssunto: Dispatch<ChapterAssunto[]>, tags: Tag[]) => tags.map(tag => (
+  <List style={{borderWidth: 0, paddingTop: 7, paddingBottom: 7, paddingLeft: 3, paddingRight: 3}} key={tag.id}>{TagUc(chaptersAssunto, setChaptersAssunto, tag)}</List>
+))
+
+function TagUc(chaptersAssunto: ChapterAssunto[], setChaptersAssunto: Dispatch<ChapterAssunto[]>, tag: Tag) {
+  return(
+    <Chip mode='outlined' textStyle={{marginVertical: 0, color: 'blue'}} onPress={() => filtroUc(chaptersAssunto, setChaptersAssunto, tag.id)}>{tag.nome}</Chip>
+  )
+};
+
+function filtroUc(chaptersAssunto: ChapterAssunto[], setChaptersAssunto: Dispatch<ChapterAssunto[]>, tagId: number){
+  var newList : ChapterAssunto[] = [];
+  chaptersAssunto.map(chapterAssunto => (
+    chapterAssunto.tags?.forEach(chapterAssuntoTag => {
+      if(chapterAssuntoTag.id == tagId){
+        newList.push(chapterAssunto); 
+      }
+    }
+    )
+  ))
+  return(setChaptersAssunto(newList))
+}
+
+
+
+function ListChaptersAssunto(setChaptersAssunto: Dispatch<ChapterAssunto[]>, chaptersAssunto: ChapterAssunto[]) {
+  
+  return(
+        <ScrollView >
+            <VStack style={{paddingBottom: 20, marginBottom: 15}}>
+                {listarChaptersAssunto(setChaptersAssunto, chaptersAssunto)}
+            </VStack>
+        </ScrollView>
+    )
+}
+
+function listarChaptersAssunto(setChaptersAssunto: Dispatch<ChapterAssunto[]>, list : ChapterAssunto[]) {
     const router = useRouter();
     return(
         (list.map(assunto => (
-            <Card style={styles.card} key={assunto.key} onPress={() => router.push({ pathname: 'Forum/Topico', params: { Title: assunto.title, descricao: assunto.description } })}>
+            <Card style={styles.card} key={assunto.key} onPress={() => router.push({ pathname: 'Forum/Topico', params: { title: assunto.title, descricao: assunto.description, autor: assunto.author, time: assunto.time } })}>
                <Card.Content style={styles.cardConteudo}>
                  <View style={styles.cardTopSide}>
                    <Title style={{fontSize: 20, width: '85%'}}>{assunto.title}</Title>
                    {(assunto.respondida)?<IconButton icon="check-circle"  iconColor='blue' size={15} onPress={() => (console.log('check'))}/>:<></>}
                  </View>
                  <View style={styles.subTitleContainer}>
-                 {(assunto.tags === undefined)?<></>:listarTags(assunto.tags)}
+                 {(assunto.tags === undefined)?<></>:listarTags(list, setChaptersAssunto, assunto.tags)}
                  </View>
                  <View style={styles.cardBotSide}>
                    <Button icon='comment' style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{assunto.comments}</Button>
@@ -53,28 +82,13 @@ function listarChaptersAssunto(list : ChapterAssunto[]) {
     )
 };
 
-
-function ListChaptersAssunto() {
-    const [chaptersAssunto, setChaptersAssunto] = useState<ChapterAssunto[]>([]);
-    useEffect(() => {setChaptersAssunto(obterChaptersAssunto())}, [])
-    return(
-        <ScrollView >
-            <VStack style={{paddingBottom: 20, marginBottom: 15}}>
-                {listarChaptersAssunto(chaptersAssunto)}
-            </VStack>
-        </ScrollView>
-    )
-}
-
-const TagUc = (tag: string) => {
-  return(
-    <Chip mode='outlined' textStyle={{marginVertical: 0, color: 'blue'}} onPress={() => console.log('Botão pressionado')}>{tag}</Chip>
-  )
-};
-
 export default function TelaForum() {
 const router = useRouter();
 const navigation = useNavigation();
+
+const [chaptersAssunto, setChaptersAssunto] = useState<ChapterAssunto[]>([]);
+useEffect(() => {setChaptersAssunto(obterChaptersAssunto())}, [])
+
   return (
     <NativeBaseProvider>
       <View style={styles.container}>
@@ -85,12 +99,11 @@ const navigation = useNavigation();
         </View>
         <View>
         <Button style={styles.pergunta} labelStyle={{fontSize: 16, color: 'white'}} onPress={() => router.push('Forum/CriarTopico')}>Pergunta</Button>
-          <ListTags/>
+          {ListTags(chaptersAssunto, setChaptersAssunto)}
         </View>
         <View style={{flex: 1}}>
-          {ListChaptersAssunto()}
+          {ListChaptersAssunto(setChaptersAssunto, chaptersAssunto)}
         </View>
-        <Text style={{fontSize: 54}}>footer</Text>
       </View>
     </NativeBaseProvider>  
   );

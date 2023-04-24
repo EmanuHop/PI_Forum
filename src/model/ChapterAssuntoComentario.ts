@@ -1,13 +1,9 @@
-import { Tag } from "./Tag";
-
-
-export interface ChapterAssunto{
+export interface ChapterAssuntoComentario{
     id: string;
     key: number,
     title: string,
     description: string,
     author: string,
-    tags: Tag[] | undefined,
     time: Date,
     views: number,
     comments: number,

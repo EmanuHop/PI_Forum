@@ -42,6 +42,7 @@ function obterChaptersAssunto() {
             description: faker.lorem.paragraph(),
             author: faker.name.firstName(),
             tags,
+            time: faker.date.birthdate({min:0, max: 2, mode: 'age'}),
             views: Math.floor(Math.random() * 100),
             comments: Math.floor(Math.random() * 10),
             like: Math.floor(Math.random() * 100),
