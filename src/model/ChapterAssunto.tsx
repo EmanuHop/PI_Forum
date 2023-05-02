@@ -8,7 +8,7 @@ export interface ChapterAssunto{
     description: string,
     author: string,
     tags: Tag[] | undefined,
-    time: Date,
+    time: string,
     views: number,
     comments: number,
     like: number,

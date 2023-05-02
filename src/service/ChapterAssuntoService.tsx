@@ -7,6 +7,15 @@ const endpoint = `${URL}/chapter/`;
 
 const allTags: Tag[] = obterTags();
 
+
+function obterChaptersAssunto() {
+    return(chaptersAssunto)
+}
+
+function adicionarChapterAssunto(assunto: ChapterAssunto) {
+    chaptersAssunto.push(assunto)
+}
+
 interface Tag {
     id: number,
     nome: string
@@ -22,7 +31,7 @@ const randomTag = (): Tag => {
     return(tag);
 }
 
-function obterChaptersAssunto() {
+function fakerChaptersAssunto() {
     var lista = [];
 
     for (let index = 0; index < 15; index++) {
@@ -42,7 +51,7 @@ function obterChaptersAssunto() {
             description: faker.lorem.paragraph(),
             author: faker.name.firstName(),
             tags,
-            time: faker.date.birthdate({min:0, max: 2, mode: 'age'}),
+            time: faker.date.birthdate({min:0, max: 2, mode: 'age'}).toString(),
             views: Math.floor(Math.random() * 100),
             comments: Math.floor(Math.random() * 10),
             like: Math.floor(Math.random() * 100),
@@ -55,5 +64,6 @@ function obterChaptersAssunto() {
 
     return lista;
 }
+const chaptersAssunto: ChapterAssunto[] = fakerChaptersAssunto();
 
-export{ obterChaptersAssunto }
+export{ obterChaptersAssunto, adicionarChapterAssunto }

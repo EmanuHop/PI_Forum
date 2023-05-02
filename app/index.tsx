@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import TelaForum from './Forum/TelaInicial';
 import Topico from './Forum/Topico';
-import CriarTopico from './Forum/CriarTopico';
+import Perguntar from './Forum/Perguntar';
 
 const Stack = createNativeStackNavigator();
 
@@ -11,7 +11,7 @@ export default function home(){
             <Stack.Group >
                 <Stack.Screen name='forum' component={TelaForum}/>
                 <Stack.Screen name='topico' component={Topico}/>
-                <Stack.Screen name='criarTopico' component={CriarTopico}/>
+                <Stack.Screen name='perguntar' component={Perguntar}/>
             </Stack.Group>
         </Stack.Navigator>
     )

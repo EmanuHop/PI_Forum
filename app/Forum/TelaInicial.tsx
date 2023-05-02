@@ -98,7 +98,7 @@ useEffect(() => {setChaptersAssunto(obterChaptersAssunto())}, [])
           <Text style={styles.navItem}>Contato</Text>
         </View>
         <View>
-        <Button style={styles.pergunta} labelStyle={{fontSize: 16, color: 'white'}} onPress={() => router.push('Forum/CriarTopico')}>Pergunta</Button>
+        <Button style={styles.pergunta} labelStyle={{fontSize: 16, color: 'white'}} onPress={() => router.push('Forum/Perguntar')}>Pergunta</Button>
           {ListTags(chaptersAssunto, setChaptersAssunto)}
         </View>
         <View style={{flex: 1}}>
