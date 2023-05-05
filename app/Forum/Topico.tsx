@@ -6,31 +6,7 @@ import { ChapterAssuntoComentario } from '../../src/model/ChapterAssuntoComentar
 import { obterChaptersAssuntoComentario } from '../../src/service/ChapterAssuntoComentarioService';
 import { faker } from '@faker-js/faker';
 
-
-const renderItem = ({comentario}: {comentario: ChapterAssuntoComentario}) => {
-    return (
-        <Card style={styles.card} key={comentario.key} >
-        <View style={styles.cardTopSideComentario}>
-            <View style={{flexDirection: 'row', alignItems: "center", flexGrow: 0}}>
-                <Chip mode="outlined" style={{flexGrow: 0}} textStyle={{marginVertical: 4, color: 'blue'}}>{comentario.author}</Chip>
-                <Text style={{color: 'grey', fontSize: 12, marginLeft: 8}}>{comentario.time.toString()}</Text>
-            </View>
-            {(comentario.respondida)?<IconButton icon="check-circle"  iconColor='blue' size={15} onPress={() => (console.log('check'))}/>:<></>}
-        </View>
-        <Card.Content style={styles.cardConteudo}>
-            <View style={styles.cardTopSide}>
-            <Text style={{fontSize: 16, width: '85%'}}>{comentario.description}</Text>
-            </View>
-            <View style={styles.cardBotSide}>
-            <Button icon='thumb-up' style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{comentario.like}</Button>
-            <Button icon='thumb-down' style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{comentario.unlike}</Button>
-            </View>
-        </Card.Content>
-    </Card>
-    );
-  };
-
-function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario[]) {
+function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario[], curtir: Function, descurtir: Function) {
     return(
         (chaptersAssunto.map((assunto, index) => (
             <Card style={styles.card} key={index} >
@@ -46,8 +22,8 @@ function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario
                    <Text style={{fontSize: 16, width: '85%'}}>{assunto.description}</Text>
                  </View>
                  <View style={styles.cardBotSide}>
-                   <Button icon='thumb-up' style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{assunto.like}</Button>
-                   <Button icon='thumb-down' style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{assunto.unlike}</Button>
+                   <Button icon={(assunto.curtida)?'thumb-up':'thumb-up-outline'} style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} onPress={() => (curtir(assunto.id))} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{assunto.like}</Button>
+                   <Button icon={(assunto.descurtida)?'thumb-down':'thumb-down-outline'} style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}}  onPress={() => (descurtir(assunto.id))} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{assunto.unlike}</Button>
                  </View>
                </Card.Content>
              </Card>
@@ -73,7 +49,9 @@ const Perguntar = (adicionarComentario: Function, chaptersAssuntoComentario: Cha
             comments: 0,
             like: 0,
             unlike: 0,
-            respondida: false
+            respondida: false,
+            curtida: false,
+            descurtida: false
         }
         adicionarComentario(novaPergunta);
     }
@@ -92,6 +70,38 @@ export default function Topico(){
     const [chaptersAssunto, setChaptersAssunto] = useState<ChapterAssuntoComentario[]>([]);
 
     useEffect(() => {setChaptersAssunto(obterChaptersAssuntoComentario())}, [])
+
+    function curtir(id : number){
+        let newState = chaptersAssunto.map(assunto => {
+            if(assunto.id == id){
+                if(assunto.curtida == true){
+                    return {...assunto, like: assunto.like-1, curtida: false}
+                }
+                if(assunto.descurtida == true){
+                    return {...assunto, unlike: assunto.unlike-1, descurtida: false, like: assunto.like+1, curtida: true}
+                }
+                return {...assunto, like: assunto.like+1, curtida: true}
+            }
+            return(assunto);
+        })
+        setChaptersAssunto(newState);
+    }
+
+    function descurtir(id : number){
+        let newState = chaptersAssunto.map(assunto => {
+            if(assunto.id == id){
+                if(assunto.descurtida == true){
+                    return {...assunto, unlike: assunto.unlike-1, descurtida: false}
+                }
+                if(assunto.curtida == true){
+                    return {...assunto, like: assunto.like-1, curtida: false, unlike: assunto.unlike+1, descurtida: true}
+                }
+                return {...assunto, unlike: assunto.unlike+1, descurtida: true}
+            }
+            return(assunto);
+        })
+        setChaptersAssunto(newState);
+    }
 
     function adicionarComentário(comentario: ChapterAssuntoComentario){
         setChaptersAssunto([...chaptersAssunto, comentario]);
@@ -121,7 +131,7 @@ export default function Topico(){
                         </Card>
                     </View>
                     <View style={{width:'100%', flex:1}}>
-                        {ListChaptersAssuntoComentario(chaptersAssunto)}
+                        {ListChaptersAssuntoComentario(chaptersAssunto, curtir, descurtir)}
                         {Perguntar(adicionarComentário, chaptersAssunto)}
                     </View>
                 </ScrollView>

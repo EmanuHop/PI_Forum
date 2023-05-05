@@ -9,5 +9,7 @@ export interface ChapterAssuntoComentario{
     comments: number,
     like: number,
     unlike: number,
-    respondida: boolean
+    respondida: boolean,
+    curtida: boolean,
+    descurtida: boolean
 }

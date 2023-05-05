@@ -20,7 +20,9 @@ function obterChaptersAssuntoComentario() {
             comments: Math.floor(Math.random() * 10),
             like: Math.floor(Math.random() * 100),
             unlike: Math.floor(Math.random() * 100),
-            respondida: faker.datatype.boolean()
+            respondida: faker.datatype.boolean(),
+            curtida: false,
+            descurtida: false,
         };
 
         lista.push(item);
