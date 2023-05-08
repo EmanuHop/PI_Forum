@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {View, Text, StyleSheet, ScrollView } from "react-native"
 import { useLocalSearchParams } from 'expo-router'
 import { Button, Card, Chip, IconButton, Title, TextInput, Provider} from 'react-native-paper'
@@ -7,6 +7,9 @@ import { ChapterAssuntoComentario } from '../../src/model/ChapterAssuntoComentar
 import { obterChaptersAssuntoComentario } from '../../src/service/ChapterAssuntoComentarioService';
 import { faker } from '@faker-js/faker';
 import { FormControl, Input, Menu, Modal, NativeBaseProvider } from 'native-base';
+import moment from 'moment';
+import { UserContext } from '../../src/context/UserContext';
+import { User } from '../../src/model/User';
 
 function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario[], curtir: Function, descurtir: Function, excluirComentario: Function, editarComentario: Function) {
     const [showModal, setShowModal] = useState(false);
@@ -23,33 +26,35 @@ function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario
         (chaptersAssunto.map((assunto, index) => (
             <Card style={styles.card} key={index} >
                 <View style={styles.cardTopSideComentario}>
-                    <View style={{flexDirection: 'row', alignItems: "center", flexGrow: 0}}>
-                        <Chip mode="outlined" style={{flexGrow: 0}} textStyle={{marginVertical: 4, color: 'blue'}}>{assunto.author}</Chip>
+                    <View style={{flexDirection: 'row', alignItems: "center", flexGrow: 0, width: '70%'}}>
+                        <Chip mode="outlined" style={{flexGrow: 0}} textStyle={{marginVertical: 4, color: 'blue'}}>{assunto.author.nome}</Chip>
                         <Text style={{color: 'grey', fontSize: 12, marginLeft: 8}}>{assunto.time.toString()}</Text>
                     </View>
-                    {(assunto.respondida)?<IconButton icon="check-circle"  iconColor='blue' size={15} onPress={() => (console.log('check'))}/>:<></>}
-                    <Menu shadow={2} w="190" placement='left top' trigger={triggerProps => {
-                        return <IconButton icon='settings-helper' style={{transform: [{ rotate: '90deg' }]}}  {...triggerProps}/>;
-                    }}>
-                        <Menu.Item onPress={() => excluirComentario(assunto.id)}>Excluir</Menu.Item>
-                        <Menu.Item onPress={() => (setShowModal(true), setEditId(assunto.id))}>Editar</Menu.Item>
-                    </Menu>
-                    <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-                        <Modal.Content maxWidth="400px">
-                        <Modal.CloseButton />
-                        <Modal.Header>Editar Comentario</Modal.Header>
-                        <Modal.Body>
-                            <FormControl isRequired={true}>
-                                <FormControl.Label>Comentario</FormControl.Label>
-                                <Input onChangeText={handleChange}/>
-                            </FormControl>
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <Button onPress={() => (setShowModal(false))}>Cancel</Button>
-                            <Button disabled={(editComentario?.trim().length == 0)?true:false} onPress={() => (setShowModal(false), editarComentario(editId, editComentario))}>Save</Button>
-                        </Modal.Footer>
-                        </Modal.Content>
-                    </Modal>
+                    <View style={{alignItems: 'center', flexDirection: 'row', justifyContent: 'flex-end'}}>
+                        {(assunto.respondida)?<IconButton icon="check-circle"  iconColor='blue' size={15} onPress={() => (console.log('check'))}/>:<></>}
+                        <Menu lineHeight={15} shadow={2}  w="120" placement='left top' trigger={triggerProps => {
+                            return <IconButton icon='settings-helper' borderless={false}  style={{transform: [{ rotate: '90deg' }]}}  {...triggerProps}/>;
+                        }}>
+                            <Menu.Item onPress={() => excluirComentario(assunto.id)}>Excluir</Menu.Item>
+                            <Menu.Item onPress={() => (setShowModal(true), setEditId(assunto.id))}>Editar</Menu.Item>
+                        </Menu>
+                        <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+                            <Modal.Content maxWidth="400px">
+                            <Modal.CloseButton />
+                            <Modal.Header>Editar Comentario</Modal.Header>
+                            <Modal.Body>
+                                <FormControl isRequired={true}>
+                                    <FormControl.Label>Comentario</FormControl.Label>
+                                    <Input onChangeText={handleChange}/>
+                                </FormControl>
+                            </Modal.Body>
+                            <Modal.Footer>
+                                <Button onPress={() => (setShowModal(false))}>Cancel</Button>
+                                <Button disabled={(editComentario?.trim().length == 0)?true:false} onPress={() => (setShowModal(false), editarComentario(editId, editComentario))}>Save</Button>
+                            </Modal.Footer>
+                            </Modal.Content>
+                        </Modal>
+                    </View>
                 </View>
                <Card.Content style={styles.cardConteudo}>
                  <View style={styles.cardTopSide}>
@@ -71,7 +76,7 @@ function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario
 
 
 
-const Perguntar = (adicionarComentario: Function, chaptersAssuntoComentario: ChapterAssuntoComentario[]) => {
+const Perguntar = (adicionarComentario: Function, chaptersAssuntoComentario: ChapterAssuntoComentario[], user: User) => {
     const [descricaoResposta, setDescricaoResposta] = useState('');
     const setResposta = (text: string) => {
         setDescricaoResposta(text);
@@ -83,8 +88,8 @@ const Perguntar = (adicionarComentario: Function, chaptersAssuntoComentario: Cha
             key: (chaptersAssuntoComentario.length+1),
             title: null,
             description: descricaoResposta,
-            author: faker.name.firstName(),
-            time: faker.date.birthdate({min:0, max: 2, mode: 'age'}),
+            author: user,
+            time: moment().utcOffset('-03:00').format('DD/MM/YYYY'),
             views: 0,
             comments: 0,
             like: 0,
@@ -97,7 +102,7 @@ const Perguntar = (adicionarComentario: Function, chaptersAssuntoComentario: Cha
     }
     return(
         <Card style={{marginLeft: '3%', marginRight: '3%', marginTop: 8, padding: 8}}>
-            <Text style={{color: 'grey', fontSize: 12, marginLeft: 8}}>Responder como user</Text>
+            <Text style={{color: 'grey', fontSize: 12, marginLeft: 8}}>Responder como {user.nome}</Text>
             <TextInput style={{backgroundColor: 'white'}} outlineColor='blue' onChangeText={text => setResposta(text)} multiline={true} mode='outlined' placeholder='Resposta'/>
             <Button onPress={() => (criarResposta())}>Perguntar</Button>
         </Card>
@@ -105,6 +110,7 @@ const Perguntar = (adicionarComentario: Function, chaptersAssuntoComentario: Cha
 }
 
 export default function Topico(){
+    const user = useContext(UserContext);
     const {title, descricao, autor, time} = useLocalSearchParams();
     
     const [chaptersAssunto, setChaptersAssunto] = useState<ChapterAssuntoComentario[]>([]);
@@ -165,6 +171,7 @@ export default function Topico(){
 
     return(
         <NativeBaseProvider>
+            <Text>{user.nome}</Text>
             <View style={{justifyContent: 'flex-start', alignItems: 'center', flex: 1}}>
                 {navBar()}
                 <ScrollView>
@@ -185,7 +192,7 @@ export default function Topico(){
                     </View>
                     <View style={{width:'100%', flex:1}}>
                         {ListChaptersAssuntoComentario(chaptersAssunto, curtir, descurtir, excluirComentario, editarComentario)}
-                        {Perguntar(adicionarComentário, chaptersAssunto)}
+                        {Perguntar(adicionarComentário, chaptersAssunto, user)}
                     </View>
                 </ScrollView>
             </View>

@@ -1,4 +1,4 @@
-import { Dispatch, useEffect, useState } from 'react';
+import { Dispatch, useContext, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useRouter, useNavigation, useSearchParams } from "expo-router";
 import { ScrollView, HStack, VStack, List, NativeBaseProvider } from 'native-base';
@@ -8,6 +8,7 @@ import { obterChaptersAssunto } from '../../src/service/ChapterAssuntoService';
 import { Tag } from '../../src/model/Tag';
 import { obterTags } from '../../src/service/tagService';
 import { navBar } from '../../src/components/navBar';
+import { UserContext } from '../../src/context/UserContext';
 
 function ListTags(chaptersAssunto: ChapterAssunto[], setChaptersAssunto: Dispatch<ChapterAssunto[]>) {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -64,7 +65,7 @@ function listarChaptersAssunto(setChaptersAssunto: Dispatch<ChapterAssunto[]>, l
     const router = useRouter();
     return(
         (list.map(assunto => (
-            <Card style={styles.card} key={assunto.key} onPress={() => router.push({ pathname: 'Forum/Topico', params: { title: assunto.title, descricao: assunto.description, autor: assunto.author, time: assunto.time } })}>
+            <Card style={styles.card} key={assunto.key} onPress={() => router.push({ pathname: 'Forum/Topico', params: { title: assunto.title, descricao: assunto.description, autor: assunto.author.nome, time: assunto.time } })}>
                <Card.Content style={styles.cardConteudo}>
                  <View style={styles.cardTopSide}>
                    <Title style={{fontSize: 20, width: '85%'}}>{assunto.title}</Title>
@@ -86,6 +87,7 @@ function listarChaptersAssunto(setChaptersAssunto: Dispatch<ChapterAssunto[]>, l
 export default function TelaForum() {
 const router = useRouter();
 const navigation = useNavigation();
+const user = useContext(UserContext);
 
 const [chaptersAssunto, setChaptersAssunto] = useState<ChapterAssunto[]>([]);
 useEffect(() => {setChaptersAssunto(obterChaptersAssunto())}, [])
@@ -94,6 +96,7 @@ useEffect(() => {setChaptersAssunto(obterChaptersAssunto())}, [])
     <NativeBaseProvider>
       <View style={styles.container}>
         {navBar()}
+        <Text>{user.nome}</Text>
         <View>
         <Button style={styles.pergunta} labelStyle={{fontSize: 16, color: 'white'}} onPress={() => router.push('Forum/Perguntar')}>Pergunta</Button>
           {ListTags(chaptersAssunto, setChaptersAssunto)}

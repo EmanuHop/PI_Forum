@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { Alert, StyleSheet, View } from "react-native";
 import { useRouter } from 'expo-router';
 import { Card, Text, TextInput, Title, Button, Modal, Portal, Provider, IconButton} from "react-native-paper";
@@ -11,9 +11,12 @@ import { adicionarChapterAssunto, obterChaptersAssunto } from '../../src/service
 import { Tag } from '../../src/model/Tag';
 import moment from 'moment';
 import { navBar } from '../../src/components/navBar';
+import { UserContext } from '../../src/context/UserContext';
 
 export default function Perguntar(){
     const router = useRouter();
+
+    const user = useContext(UserContext);
 
     const [visible, setVisible] = useState(false);
     const showModal = () => setVisible(true);
@@ -44,7 +47,7 @@ export default function Perguntar(){
             key: obterChaptersAssunto().length +1,
             title: titulo,
             description: descricao,
-            author: 'Humberto',
+            author: user,
             tags: convertTags(selectedTags),
             time: moment().utcOffset('-03:00').format('DD/MM/YYYY'),
             views: 0,

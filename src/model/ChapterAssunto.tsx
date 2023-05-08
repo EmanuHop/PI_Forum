@@ -1,4 +1,5 @@
 import { Tag } from "./Tag";
+import { User } from "./User";
 
 
 export interface ChapterAssunto{
@@ -6,7 +7,7 @@ export interface ChapterAssunto{
     key: number,
     title: string,
     description: string,
-    author: string,
+    author: User,
     tags: Tag[] | undefined,
     time: string,
     views: number,
