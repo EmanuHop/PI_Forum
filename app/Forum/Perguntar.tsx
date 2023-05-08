@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { useRouter } from 'expo-router';
 import { Card, Text, TextInput, Title, Button, Modal, Portal, Provider, IconButton} from "react-native-paper";
 import { Input, InputGroup, InputLeftAddon, NativeBaseProvider, ScrollView, Select } from "native-base";
@@ -10,6 +10,7 @@ import { faker } from '@faker-js/faker';
 import { adicionarChapterAssunto, obterChaptersAssunto } from '../../src/service/ChapterAssuntoService';
 import { Tag } from '../../src/model/Tag';
 import moment from 'moment';
+import { navBar } from '../../src/components/navBar';
 
 export default function Perguntar(){
     const router = useRouter();
@@ -38,7 +39,7 @@ export default function Perguntar(){
     const [descricao, setDescricao] = useState('')
     
     function criarTopico(): void{
-        let topico: ChapterAssunto = {
+        let assunto: ChapterAssunto = {
             id: faker.datatype.number(100000),
             key: obterChaptersAssunto().length +1,
             title: titulo,
@@ -52,18 +53,15 @@ export default function Perguntar(){
             unlike: 0,
             respondida: false
         }
-        adicionarChapterAssunto(topico);
+        adicionarChapterAssunto(assunto);
+        router.push({ pathname: 'Forum/Topico', params: { title: assunto.title, descricao: assunto.description, autor: assunto.author, time: assunto.time } })
     }
 
     return(
     <Provider>
         <NativeBaseProvider>
             <View style={{flex: 1, justifyContent: 'flex-start', alignItems:'center'}}>
-                <View style={styles.navBar}>
-                    <Text style={styles.navItem}>Home</Text>
-                    <Text style={styles.navItem}>Sobre</Text>
-                    <Text style={styles.navItem}>Contato</Text>
-                </View>
+                {navBar()}
                 <ScrollView style={{flex: 1, width: '100%'}}>
                     <View style={{alignItems: 'center'}}>
                         <Title style={{marginTop: 10}}>Faça sua Pergunta</Title>
@@ -132,7 +130,7 @@ export default function Perguntar(){
                             </Card.Content>
                         </Card>
                         <View style={{marginTop: 16, marginBottom: 8}}>
-                            <Button mode="contained" style={{backgroundColor: '#1981CD'}} labelStyle={{width: 150}} onPress={() => (criarTopico(), router.back())}>Perguntar</Button>
+                            <Button mode="contained" style={{backgroundColor: '#1981CD'}} labelStyle={{width: 150}} onPress={() => ((titulo.trim().length == 0 || descricao.trim().length == 0)?Alert.alert('Erro', 'Titulo e descricao nao podem estar vazios!'):criarTopico())}>Perguntar</Button>
                         </View>
                     </View>
                 </ScrollView>
@@ -143,19 +141,6 @@ export default function Perguntar(){
 }
 
 const styles = StyleSheet.create({
-    navBar: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        backgroundColor: '#1981CD',
-        height: 85,
-        width: '100%',
-        paddingTop: 35
-    },
-    navItem: {
-        color: '#fff',
-        fontSize: 18,
-    },
     card: {
         marginLeft: '3%',
         marginRight: '3%',

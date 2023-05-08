@@ -1,12 +1,24 @@
 import { useEffect, useState } from 'react';
-import {View, Text, StyleSheet, ScrollView} from "react-native"
-import { useNavigation, useRouter, useLocalSearchParams } from 'expo-router'
-import { Button, Card, Chip, IconButton, Title, TextInput} from 'react-native-paper'
+import {View, Text, StyleSheet, ScrollView } from "react-native"
+import { useLocalSearchParams } from 'expo-router'
+import { Button, Card, Chip, IconButton, Title, TextInput, Provider} from 'react-native-paper'
+import { navBar } from '../../src/components/navBar';
 import { ChapterAssuntoComentario } from '../../src/model/ChapterAssuntoComentario';
 import { obterChaptersAssuntoComentario } from '../../src/service/ChapterAssuntoComentarioService';
 import { faker } from '@faker-js/faker';
+import { FormControl, Input, Menu, Modal, NativeBaseProvider } from 'native-base';
 
-function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario[], curtir: Function, descurtir: Function) {
+function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario[], curtir: Function, descurtir: Function, excluirComentario: Function, editarComentario: Function) {
+    const [showModal, setShowModal] = useState(false);
+
+    const [editComentario, setEditComentario] = useState<string>('');
+
+    function handleChange(text: string){
+        setEditComentario(text);
+    }
+
+    const [ editId, setEditId] = useState<number>()
+
     return(
         (chaptersAssunto.map((assunto, index) => (
             <Card style={styles.card} key={index} >
@@ -16,6 +28,28 @@ function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario
                         <Text style={{color: 'grey', fontSize: 12, marginLeft: 8}}>{assunto.time.toString()}</Text>
                     </View>
                     {(assunto.respondida)?<IconButton icon="check-circle"  iconColor='blue' size={15} onPress={() => (console.log('check'))}/>:<></>}
+                    <Menu shadow={2} w="190" placement='left top' trigger={triggerProps => {
+                        return <IconButton icon='settings-helper' style={{transform: [{ rotate: '90deg' }]}}  {...triggerProps}/>;
+                    }}>
+                        <Menu.Item onPress={() => excluirComentario(assunto.id)}>Excluir</Menu.Item>
+                        <Menu.Item onPress={() => (setShowModal(true), setEditId(assunto.id))}>Editar</Menu.Item>
+                    </Menu>
+                    <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+                        <Modal.Content maxWidth="400px">
+                        <Modal.CloseButton />
+                        <Modal.Header>Editar Comentario</Modal.Header>
+                        <Modal.Body>
+                            <FormControl isRequired={true}>
+                                <FormControl.Label>Comentario</FormControl.Label>
+                                <Input onChangeText={handleChange}/>
+                            </FormControl>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button onPress={() => (setShowModal(false))}>Cancel</Button>
+                            <Button disabled={(editComentario?.trim().length == 0)?true:false} onPress={() => (setShowModal(false), editarComentario(editId, editComentario))}>Save</Button>
+                        </Modal.Footer>
+                        </Modal.Content>
+                    </Modal>
                 </View>
                <Card.Content style={styles.cardConteudo}>
                  <View style={styles.cardTopSide}>
@@ -25,11 +59,17 @@ function ListChaptersAssuntoComentario(chaptersAssunto: ChapterAssuntoComentario
                    <Button icon={(assunto.curtida)?'thumb-up':'thumb-up-outline'} style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}} onPress={() => (curtir(assunto.id))} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{assunto.like}</Button>
                    <Button icon={(assunto.descurtida)?'thumb-down':'thumb-down-outline'} style={{minWidth: 15}} contentStyle={{flexDirection: 'row-reverse', gap:10, justifyContent: 'flex-end'}}  onPress={() => (descurtir(assunto.id))} labelStyle={{marginHorizontal: 0, marginVertical: 0, color: 'blue'}}>{assunto.unlike}</Button>
                  </View>
+                 
+                 {/* {comentarioMenu(assunto, index, curtir, descurtir)} */}
                </Card.Content>
+               
              </Card>
-
+                // {/* {assuntoComentario(assunto, index, curtir, descurtir)} */}
+            
     ))))
 }
+
+
 
 const Perguntar = (adicionarComentario: Function, chaptersAssuntoComentario: ChapterAssuntoComentario[]) => {
     const [descricaoResposta, setDescricaoResposta] = useState('');
@@ -107,13 +147,26 @@ export default function Topico(){
         setChaptersAssunto([...chaptersAssunto, comentario]);
     }
 
+    function excluirComentario(id: number){
+        setChaptersAssunto(chaptersAssunto.filter(assunto => assunto.id != id));
+    }
+
+    function editarComentario(id: number, editComentario: string){
+        let newState = chaptersAssunto.map(assunto => {
+            if(assunto.id == id){
+                console.log(id);
+                return {...assunto, description: editComentario}
+            }
+            return(assunto);
+        })
+        setChaptersAssunto(newState);
+        console.log("teste");
+    }
+
     return(
-        <View style={{justifyContent: 'flex-start', alignItems: 'center', flex: 1}}>
-                <View style={styles.navBar}>
-                    <Text style={styles.navItem}>Home</Text>
-                    <Text style={styles.navItem}>Sobre</Text>
-                    <Text style={styles.navItem}>Contato</Text>
-                </View>
+        <NativeBaseProvider>
+            <View style={{justifyContent: 'flex-start', alignItems: 'center', flex: 1}}>
+                {navBar()}
                 <ScrollView>
                     <View style={{width:'100%'}}>
                         <Card style={{marginLeft: '3%', marginRight: '3%', marginTop: '5%'}}>
@@ -131,28 +184,16 @@ export default function Topico(){
                         </Card>
                     </View>
                     <View style={{width:'100%', flex:1}}>
-                        {ListChaptersAssuntoComentario(chaptersAssunto, curtir, descurtir)}
+                        {ListChaptersAssuntoComentario(chaptersAssunto, curtir, descurtir, excluirComentario, editarComentario)}
                         {Perguntar(adicionarComentário, chaptersAssunto)}
                     </View>
                 </ScrollView>
             </View>
+        </NativeBaseProvider>
     )
 }
 
 const styles = StyleSheet.create({
-    navBar: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        backgroundColor: '#1981CD',
-        height: 85,
-        width: '100%',
-        paddingTop: 35
-    },
-    navItem: {
-        color: '#fff',
-        fontSize: 18,
-    },
     card: {
         marginLeft: '3%',
         marginRight: '3%',

@@ -7,6 +7,7 @@ import { ChapterAssunto } from '../../src/model/ChapterAssunto';
 import { obterChaptersAssunto } from '../../src/service/ChapterAssuntoService';
 import { Tag } from '../../src/model/Tag';
 import { obterTags } from '../../src/service/tagService';
+import { navBar } from '../../src/components/navBar';
 
 function ListTags(chaptersAssunto: ChapterAssunto[], setChaptersAssunto: Dispatch<ChapterAssunto[]>) {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -92,11 +93,7 @@ useEffect(() => {setChaptersAssunto(obterChaptersAssunto())}, [])
   return (
     <NativeBaseProvider>
       <View style={styles.container}>
-        <View style={styles.navBar}>
-          <Text style={styles.navItem}>Home</Text>
-          <Text style={styles.navItem}>Sobre</Text>
-          <Text style={styles.navItem}>Contato</Text>
-        </View>
+        {navBar()}
         <View>
         <Button style={styles.pergunta} labelStyle={{fontSize: 16, color: 'white'}} onPress={() => router.push('Forum/Perguntar')}>Pergunta</Button>
           {ListTags(chaptersAssunto, setChaptersAssunto)}
@@ -166,18 +163,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'darkgray',
     marginLeft: '20%',
     marginRight: '20%'
-  },
-  navBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#1981CD',
-    height: 85,
-    width: '100%',
-    paddingTop: 35
-  },
-  navItem: {
-    color: '#fff',
-    fontSize: 18,
-  }  
+  }
 });
